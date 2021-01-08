@@ -37,6 +37,9 @@ class TicTacToe:
         Draw: number of turns are 9 and no winners
     '''        
     def check_end_game(self,current_player):
+        #check draw 
+        if(self.turn == 9):
+            self.gameStatus='draw'
         #check horizontally
         sum_of_line = 0
         for row in self.state:
