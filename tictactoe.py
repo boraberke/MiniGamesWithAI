@@ -8,18 +8,21 @@ class Squares(Enum):
 
 class TicTacToe:
 
-    def __init__(self):
+    def __init__(self,next_player):
         self.state = [[Squares.Empty for i in range(3)]for j in range(3)]
-        self.next_player = Squares.Cross
+        self.next_player = next_player
         self.turn = 0
         self.gameStatus = 'play'
-    '''
-    Plays one turn of the current player, returns the current player
-    Then calls 'check_end_game' method.
-    '''
-    def one_turn(self,x,y):
+
+    def one_turn(self,pos):
+        '''
+        Plays one turn of the current player, returns the current player
+        Then calls 'check_end_game' method.
+        '''
+        x = pos[0]
+        y = pos[1]
         current_player = self.next_player
-        if (self.legal(x,y)):
+        if (self.legal(pos)):
             self.turn+=1
             print(self.turn)
             if(current_player == Squares.Cross):
@@ -30,13 +33,14 @@ class TicTacToe:
                 self.next_player = Squares.Cross
             self.check_end_game(current_player)  
         return current_player
-    '''
-    Check win and draw conditions:
+       
+    def check_end_game(self,current_player):
+        '''
+        Check win and draw conditions:
         Cross Wins: three of the squares are marked with cross in a horizontal,vertical or diagonal row
         Circle Wins: three of the squares are marked with cross in a horizontal,vertical or diagonal row
         Draw: number of turns are 9 and no winners
-    '''        
-    def check_end_game(self,current_player):
+        ''' 
         #check draw 
         if(self.turn == 9):
             self.gameStatus='draw'
@@ -94,9 +98,9 @@ class TicTacToe:
                 if(sum_of_line==3):
                     self.gameStatus=current_player
 
-    def legal(self,x,y):
+    def legal(self,pos):
         # tile is empty
-        if (self.state[y][x] == Squares.Empty):
+        if (self.state[pos[1]][pos[0]] == Squares.Empty):
             return True
         else:
             return False
