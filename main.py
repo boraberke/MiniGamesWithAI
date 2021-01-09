@@ -1,6 +1,11 @@
+from threading import Thread
 from graphics import TicTacToeTable 
 from tictactoe import TicTacToe,Squares
 
-game = TicTacToe(Squares.Circle)
-table  = TicTacToeTable(game)
+table  = TicTacToeTable()
+game = TicTacToe(table,Squares.Cross)
+control_thread = Thread(target=game.run, daemon=True)
+control_thread.start()
+table.run_mainloop()
+
 
