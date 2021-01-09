@@ -2,7 +2,6 @@ import tkinter as tk
 from tictactoe import TicTacToe
 from tictactoe import Squares
 
-
 class TicTacToeTable:
 
     def __init__(self,game):
@@ -47,20 +46,20 @@ class TicTacToeTable:
                 self._draw_circle(position)
             self.game.print_state()
 
-    def _draw_winner_line(self,start_pos,end_pos):
-        x_start = start_pos[0] * self.rectangle_width + self.x_offset
-        x_end = end_pos[0] * self.rectangle_width + 3 * self.x_offset   
-        y_start = start_pos[1] * self.rectangle_height + self.y_offset
-        y_end = end_pos[1] * self.rectangle_height + 3 * self.y_offset 
-        self.canvas.create_line(x_start,y_start,x_end,y_end,width=4,fill='white')
+    def _draw_winner_line(self,positions):
+        x_start = positions[0] * self.rectangle_width + self.rectangle_width / 2
+        x_end = positions[2] * self.rectangle_width + self.rectangle_width / 2
+        y_start = positions[1] * self.rectangle_height + self.rectangle_width / 2
+        y_end = positions[3] * self.rectangle_height + self.rectangle_width / 2
+        self.canvas.create_line(x_start,y_start,x_end,y_end,width=5,fill='red')
     
     def _draw_circle(self,position):
-        self.canvas.create_oval(self.__cross_circle_positions(position),width=2,outline='orange')
+        self.canvas.create_oval(self.__cross_circle_positions(position),width=2,outline='blue')
         
     def _draw_cross(self,position):
         x1,y1,x2,y2 = self.__cross_circle_positions(position)
-        self.canvas.create_line(x1,y1,x2,y2,width=2,fill='orange')
-        self.canvas.create_line(x1,y2,x2,y1,width=2,fill='orange')
+        self.canvas.create_line(x1,y1,x2,y2,width=2,fill='blue')
+        self.canvas.create_line(x1,y2,x2,y1,width=2,fill='blue')
 
     def __cross_circle_positions(self,position):
         # to put cross and circles at the center of the squares
@@ -82,6 +81,8 @@ class TicTacToeTable:
         self.game.print_state()
         if(self.game.legal(position)):
             self._draw_next(position)
+            if (self.game.winner !='' and self.game.winner !='draw' ):
+                self._draw_winner_line(self.game.winner_line)
 
 
 
