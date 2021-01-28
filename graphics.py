@@ -1,12 +1,14 @@
+# graphics.py
+
 import tkinter as tk
 from tictactoe import TicTacToe
 from tictactoe import Squares
 
 class TicTacToeTable:
-
+    """Graphics of TicTacToe"""
     def __init__(self):
         #Constants to draw 
-        self.WIDTH =400
+        self.WIDTH =500
         self.HEIGHT = self.WIDTH
         self.OFFSET = self.WIDTH/25
         self.x_offset = self.WIDTH/12
@@ -53,12 +55,12 @@ class TicTacToeTable:
         self.canvas.create_line(x_start,y_start,x_end,y_end,width=5,fill='red')
     
     def _draw_circle(self,position):
-        self.canvas.create_oval(self.__cross_circle_positions(position),width=2,outline='blue')
+        self.canvas.create_oval(self.__cross_circle_positions(position),width=4,fill='red',outline='green')
         
     def _draw_cross(self,position):
         x1,y1,x2,y2 = self.__cross_circle_positions(position)
-        self.canvas.create_line(x1,y1,x2,y2,width=2,fill='blue')
-        self.canvas.create_line(x1,y2,x2,y1,width=2,fill='blue')
+        self.canvas.create_line(x1,y1,x2,y2,width=4,fill='green')
+        self.canvas.create_line(x1,y2,x2,y1,width=4,fill='green')
 
     def __cross_circle_positions(self,position):
         # to put cross and circles at the center of the squares
@@ -77,7 +79,8 @@ class TicTacToeTable:
         # get the square which is clicked as position i.e (x,y)
         position = self._clicked_position(event.x,event.y)
         # add the position to the next_pos list
-        self.next_pos.append(position)  
+        if not self.next_pos:            
+            self.next_pos.append(position)  
 
     def update(self,pos_player,winner_line_pos):
         self._draw_next(pos_player[0],pos_player[1])

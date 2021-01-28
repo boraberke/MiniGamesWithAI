@@ -1,3 +1,4 @@
+import random
 class Agent():
     def __init__(self,depth):
         self.depth_limit = depth
@@ -6,11 +7,12 @@ class Agent():
         return None
 
 # this minimax algorithm was made for COMP 341 homework taken from CS 188 Pacman assignment of Berkeley.
-# https://inst.eecs.berkeley.edu/~cs188/fa20/
 # following is derived from my solutions.
 class Minimax_Agent(Agent):
 
     def get_best_action(self,game_state,depth,agent_index):
+        if(game_state.is_start_state()):
+            return 0,random.choice(game_state.get_legal_actions())
         return self.value(game_state,depth,agent_index)
     # this method selects the next step to be calculated
     def value(self,game_state,depth, agent_index):
