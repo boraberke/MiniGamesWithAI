@@ -24,7 +24,6 @@ class TicTacToeTable:
         
     def _initialize_canvas(self):
         self.canvas.update()
-        # TO DO: add options
         self._draw_xox_table(2,'white')
         self.canvas.configure(bg='black')
         self.canvas.bind("<Button-1>", self._callback)
@@ -86,3 +85,87 @@ class TicTacToeTable:
         self._draw_next(pos_player[0],pos_player[1])
         if (winner_line_pos != ''):
             self._draw_winner_line(winner_line_pos)
+
+class SnakeBasicDisplay:
+    '''
+    allows you to play it on console, printing the state to the console.
+    '''
+    def initialize(self,state):
+        state.print_state()
+    def update(self,state):
+        state.print_state()
+
+
+class SnakeTkinterDisplay:
+    def initialize(self,state):
+        MAX_SIZE = 500
+        # get number of squares in the state
+        self.square_counts = (state.width,state.height)
+        self.width_height_rate = self.square_counts[0]/self.square_counts[1]
+        if ( self.width_height_rate > 1 ):
+            self.width = MAX_SIZE
+            self.height = round(MAX_SIZE / self.width_height_rate)
+        elif ( self.width_height_rate < 1 ):
+            self.height = MAX_SIZE
+            self.width = round(MAX_SIZE * self.width_height_rate)
+        else:
+            self.height = MAX_SIZE
+            self.width = MAX_SIZE
+        self.rectangle_width = self.width // self.square_counts[0]
+        self.rectangle_height = self.height // self.square_counts[1]
+        #screen and canvas
+        self.root = tk.Tk()
+        self.canvas = tk.Canvas(self.root,width=self.width,height=self.height)
+        self._initialize_canvas(state)
+        
+        
+    def _initialize_canvas(self,game_state):
+        state = game_state.state
+        self.canvas.update()
+        for y in range(len(state)):
+            for x in range(len(state[y])):
+                self._draw_rect((x,y),state[y][x])
+        self.canvas.configure(bg='black')
+        self.canvas.pack()
+
+    def run_mainloop(self):
+        self.root.mainloop()
+
+    def update(self,game_state):
+        import copy
+        from snake import Squares as s
+        # draw the removed tail
+        if ( not game_state.empty_positions_to_update.empty()):
+            empty_pos = game_state.empty_positions_to_update.get()
+            self._draw_rect(empty_pos,s.Empty)
+        snake_positions = copy.deepcopy(game_state.snake_positions)
+        new_head_pos = snake_positions.pop()
+        # draw new head position
+        self._draw_rect(new_head_pos,s.Snake)
+        # draw the food position
+        self._draw_rect(game_state.food_position,s.Food)
+
+    def get_canvas_coordinates(self,coordinates):
+        x = coordinates[0]
+        y = coordinates[1]
+        return (self.rectangle_height * x,self.rectangle_width * y)
+    
+    def _draw_rect(self,coordinates,square_type):
+        coordinates = self.get_canvas_coordinates(coordinates)
+        from snake import Squares as s
+        square_type = square_type.value
+        x1 = coordinates[0]
+        y1 = coordinates[1]
+        x2 = x1 + self.rectangle_width
+        y2 = y1 + self.rectangle_height
+        if ( square_type == s.Snake.value ):
+            self.canvas.create_rectangle(x1,y1,x2,y2,fill='white')
+        elif ( square_type == s.Wall.value ):
+            self.canvas.create_rectangle(x1,y1,x2,y2,fill='orange')
+        elif ( square_type == s.Food.value ):
+            self.canvas.create_oval(x1,y1,x2,y2,fill='white')
+        else:
+            self.canvas.create_rectangle(x1,y1,x2,y2,fill='black')
+
+
+

@@ -20,13 +20,16 @@ class GameState:
         self.snake_facing = snake_facing
         self.snake_positions = self._initialize_snake_pos(snake_length)
         self.is_end = False
+        self.food_position = None
         self.add_random_food()
         self.score = 0
+        self.empty_positions_to_update = queue.Queue()
     
     def add_random_food(self):
         empty_squares = self.get_empty_positions()
         pos = random.choice(empty_squares)
         self.update_state(pos,Squares.Food)
+        self.food_position = pos
     def _initialize_snake_pos(self,snake_length):
         snake_positions = queue.deque()
         center_x,center_y = self.get_center_pos()
@@ -120,6 +123,7 @@ class GameState:
             #remove the tail
             tail = self.snake_positions.popleft()
             self.update_state(tail,Squares.Empty)
+            self.empty_positions_to_update.put(tail)
         else:
             self.add_random_food()
             self.score += 5
@@ -162,11 +166,13 @@ class GameState:
         
 
 class SnakeGame():
-    def __init__(self):
-        self.state = GameState(15,15,5,'NORTH')
+    def __init__(self,display):
+        self.state = GameState(10,10,3,'NORTH')
         self.player = 'Human'
         self.actionQueue = queue.Queue()
         self.listener = None
+        self.display = display
+        self.display.initialize(self.state)
 
     
     def check_keystrokes(self):
@@ -194,19 +200,27 @@ class SnakeGame():
                 action = self.actionQueue.get()
                 self.state.apply_action(action)
             self.state.move_snake()
-            self.state.print_state()
+            self.display.update(self.state)
             self.state.check_end_game()
-            time.sleep(0.15)
+            time.sleep(0.2)
     
             
 
 
 
-        
-snake = SnakeGame()
-snake.run()
 
+if __name__ == "__main__":
+    from graphics import SnakeTkinterDisplay,SnakeBasicDisplay
+    from threading import Thread
+    display = SnakeTkinterDisplay()
+    snake = SnakeGame(display)
+    control_thread = Thread(target=snake.run, daemon=True)
+    control_thread.start()
+    display.run_mainloop()
 
+    # display2 = SnakeBasicDisplay()
+    # snake = SnakeGame(display2)
+    # snake.run()
 
 
 
