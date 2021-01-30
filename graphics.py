@@ -113,6 +113,7 @@ class SnakeTkinterDisplay:
             self.width = MAX_SIZE
         self.rectangle_width = self.width // self.square_counts[0]
         self.rectangle_height = self.height // self.square_counts[1]
+        self.offset = max(self.rectangle_width / 8,self.rectangle_height / 8)
         #screen and canvas
         self.root = tk.Tk()
         self.canvas = tk.Canvas(self.root,width=self.width,height=self.height)
@@ -139,9 +140,9 @@ class SnakeTkinterDisplay:
             empty_pos = game_state.empty_positions_to_update.get()
             self._draw_rect(empty_pos,s.Empty)
         snake_positions = copy.deepcopy(game_state.snake_positions)
-        new_head_pos = snake_positions.pop()
+        head_pos = snake_positions.pop()
         # draw new head position
-        self._draw_rect(new_head_pos,s.Snake)
+        self._draw_rect(head_pos,s.Snake)
         # draw the food position
         self._draw_rect(game_state.food_position,s.Food)
 
@@ -149,6 +150,7 @@ class SnakeTkinterDisplay:
         x = coordinates[0]
         y = coordinates[1]
         return (self.rectangle_height * x,self.rectangle_width * y)
+    
     
     def _draw_rect(self,coordinates,square_type):
         coordinates = self.get_canvas_coordinates(coordinates)
@@ -158,12 +160,13 @@ class SnakeTkinterDisplay:
         y1 = coordinates[1]
         x2 = x1 + self.rectangle_width
         y2 = y1 + self.rectangle_height
+        offset = self.offset
         if ( square_type == s.Snake.value ):
-            self.canvas.create_rectangle(x1,y1,x2,y2,fill='white')
+            self.canvas.create_rectangle(x1+offset,y1+offset,x2-offset,y2-offset,fill='white')
         elif ( square_type == s.Wall.value ):
             self.canvas.create_rectangle(x1,y1,x2,y2,fill='orange')
         elif ( square_type == s.Food.value ):
-            self.canvas.create_oval(x1,y1,x2,y2,fill='white')
+            self.canvas.create_oval(x1+offset,y1+offset,x2-offset,y2-offset,fill='red')
         else:
             self.canvas.create_rectangle(x1,y1,x2,y2,fill='black')
 

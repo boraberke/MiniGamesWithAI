@@ -44,7 +44,7 @@ class GameState:
             elif(self.snake_facing == 'WEST'):
                 pos = (center_x+i,center_y) 
             # check if the position is a legal position (i.e. not a wall)
-            if(self.is_legal(pos)):
+            if(self.is_legal_position(pos)):
                 snake_positions.appendleft(pos)
                 self.state[pos[1]][pos[0]] = Squares.Snake
             else:
@@ -78,13 +78,21 @@ class GameState:
                     empty_positions.append((x,y))
         return empty_positions
 
-    def is_legal(self,pos):
+    def is_legal_position(self,pos):
         x,y = pos
         # tile is empty
         if (self.state[y][x] != Squares.Wall and self.state[y][x] != Squares.Snake):
             return True
         else:
             return False
+    def is_legal_action(self,action):
+        if (self.snake_facing =='NORTH' or self.snake_facing =='SOUTH'):
+            if (action=='WEST' or action =='EAST'):
+                return True
+        else:
+            if (action=='NORTH' or action=='SOUTH'):
+                return True
+
     def is_ended(self):
         return self.is_end
     
@@ -92,12 +100,8 @@ class GameState:
         '''
         Change the direction that snake is facing.
         '''
-        if (self.snake_facing =='NORTH' or self.snake_facing =='SOUTH'):
-            if (action=='WEST' or action =='EAST'):
-                self.snake_facing = action
-        else:
-            if (action=='NORTH' or action=='SOUTH'):
-                self.snake_facing = action
+        if(self.is_legal_action(action)):
+            self.snake_facing = action
     def next_snake_pos(self,head_pos):
         x = head_pos[0]
         y = head_pos[1]
@@ -128,7 +132,7 @@ class GameState:
             self.add_random_food()
             self.score += 5
         # update the state if it is a legal move
-        if (self.is_legal(next_pos)):
+        if (self.is_legal_position(next_pos)):
             self.update_state(next_pos,Squares.Snake)
     
     def check_end_game(self):
@@ -167,18 +171,21 @@ class GameState:
 
 class SnakeGame():
     def __init__(self,display):
-        self.state = GameState(10,10,3,'NORTH')
+        self.state = GameState(11,11,3,'WEST')
         self.player = 'Human'
         self.actionQueue = queue.Queue()
         self.listener = None
         self.display = display
         self.display.initialize(self.state)
+        self.sleep_time = 0.20
+        self.last_change_at = 0
 
     
     def check_keystrokes(self):
         if self.listener == None:
             self.listener = keyboard.Listener(on_press = self.add_actions)
             self.listener.start()
+    
     def add_actions(self,key):
         try: 
             key = key.char
@@ -192,6 +199,7 @@ class SnakeGame():
             self.actionQueue.put('SOUTH')
         elif (key == 'd'):
             self.actionQueue.put('EAST')
+
     
     def run(self):
         self.check_keystrokes()
@@ -202,7 +210,14 @@ class SnakeGame():
             self.state.move_snake()
             self.display.update(self.state)
             self.state.check_end_game()
-            time.sleep(0.2)
+            time.sleep(self.sleep_time)
+            self.update_sleep_time()
+
+    def update_sleep_time(self):
+        if ( self.state.score % 15 == 0 and self.last_change_at != self.state.score and self.sleep_time >= 0.1):
+            self.sleep_time-=0.02
+            self.last_change_at = self.state.score
+            print(self.sleep_time)
     
             
 
