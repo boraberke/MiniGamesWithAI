@@ -1,6 +1,6 @@
 import zope.event
 from enum import Enum 
-from agents import Minimax_Agent
+from agents import Minimax_Agent_TicTacToe
 import random
 import time
 import copy
@@ -121,7 +121,7 @@ class TicTacToe:
             self.player2 = Squares.Circle
         self.next_player = self.player1
 
-        self.Agent = Minimax_Agent(15)
+        self.Agent = Minimax_Agent_TicTacToe(15)
         # winner line to draw a line from x1,y1 to x2,y2: (x1,y1,x2,y2)
         self.winner_line = (0,0,0,0)
 

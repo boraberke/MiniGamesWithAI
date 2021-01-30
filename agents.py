@@ -52,6 +52,10 @@ class Minimax_Agent(Agent):
         return v
     
     def evaluation_function(self,game_state):
+        return None
+    
+class Minimax_Agent_TicTacToe(Minimax_Agent):
+    def evaluation_function(self,game_state):
         return game_state.check_end_game()[0].value
 
 def is_ended(game_state):
@@ -59,4 +63,6 @@ def is_ended(game_state):
         return False
     else:
         return True
+
+#class Approximate_QLearning():
        
