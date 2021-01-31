@@ -12,3 +12,19 @@ def manhattan_distance(pos1,pos2):
 if __name__ == "__main__":
     import doctest
     doctest.testmod()
+
+def get_random_bool(p):
+    '''
+    return random boolean with probability p.
+    '''
+    import random
+    r = random.random()
+    return r < p
+
+def divide_all(dictionary,divisor):
+    """
+    Divides all counts of dictionary by divisor
+    """
+    divisor = float(divisor)
+    for key in dictionary:
+        dictionary[key] /= divisor

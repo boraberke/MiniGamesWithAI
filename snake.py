@@ -5,6 +5,8 @@ from pynput import keyboard
 import time
 from featureExtractors import SnakeSimpleExtractor as features
 from collections import deque 
+from agents import Approximate_QLearning_Agent
+import statistics
 
 class Squares(Enum):
     """Squares to fill the game state."""
@@ -24,7 +26,7 @@ class GameState:
         self.snake_facing = snake_facing
         self.snake_positions = self._initialize_snake_pos(snake_length)
         self.is_end = False
-        
+        self.reward = 0
         self.add_random_food()
         self.score = 0
         self.empty_positions_to_update = deque()
@@ -38,6 +40,7 @@ class GameState:
         state = copy.deepcopy(self)
         state.apply_action(action)
         state.move_snake()
+        state.check_end_game()
         return state
 
     def get_walls(self):
@@ -198,7 +201,7 @@ class GameState:
     
     def get_reward(self):
         if self.check_end_game():
-            return -100
+            return -500
         else:
             return self.reward
     def move_snake(self):
@@ -262,14 +265,15 @@ class GameState:
 
 class SnakeGame():
     def __init__(self,display):
-        self.state = GameState(11,11,3,'NORTH')
+        self.state = GameState(13,13,3,'NORTH')
         self.player = 'Human'
         self.actionQueue = queue.Queue()
         self.listener = None
         self.display = display
         self.display.initialize(self.state)
-        self.sleep_time = 0.2
+        self.sleep_time = 0.25
         self.last_change_at = 0
+        self.move_count = 0
 
     
     def check_keystrokes(self):
@@ -292,43 +296,65 @@ class SnakeGame():
             self.actionQueue.put('EAST')
 
     
-    def run(self):
-        self.check_keystrokes()
+    def run(self,**kwargs):
+        agent = kwargs['agent']
+        mode = kwargs['mode']
+        if mode=='play' or mode=='debug':
+            self.check_keystrokes()
         while (not self.state.is_ended()):
+            if mode=='train' or mode=='test':
+                self.actionQueue.put(agent.get_action(self.state))
             if (not self.actionQueue.empty()):
                 action = self.actionQueue.get()
                 self.state.apply_action(action)
-                print(features.get_features(self.state,action))
+                if mode=='train' or mode=='debug':
+                    agent.update(self.state,action)
+                #print(features.get_features(self.state,action))
             else:
-                print(features.get_features(self.state,None))
+                if mode=='train' or mode=='debug':
+                    agent.update(self.state,None)
+                #print(features.get_features(self.state,None))
             self.state.move_snake()
-            self.display.update(self.state)
             self.state.check_end_game()
-            time.sleep(self.sleep_time)
-            self.update_sleep_time()
-            
+            self.move_count+=1
+            if not mode=='train':
+                time.sleep(self.sleep_time)
+                self.update_sleep_time()
+            elif(mode=='train'):
+                if agent.episode_limit <= self.move_count:
+                    print('episode limit reached.')
+                    break
+            self.display.update(self.state)
+
+        print(self.state.score,end=' ')
+        return self.state.score
 
     def update_sleep_time(self):
         if ( self.state.score % 15 == 0 and self.last_change_at != self.state.score and self.sleep_time >= 0.1):
             self.sleep_time-=0.02
             self.last_change_at = self.state.score    
-            
-
+                
 
 
 
 if __name__ == "__main__":
-    from graphics import SnakeTkinterDisplay,SnakeBasicDisplay
+    from graphics import SnakeTkinterDisplay,SnakeNoDisplay
     from threading import Thread
-    display = SnakeTkinterDisplay()
-    snake = SnakeGame(display)
-    control_thread = Thread(target=snake.run, daemon=True)
-    control_thread.start()
-    display.run_mainloop()
-
-    # display2 = SnakeBasicDisplay()
-    # snake = SnakeGame(display2)
-    # snake.run()
-
+    agent = Approximate_QLearning_Agent(features,learning_rate=0.5)
+    scores = []
+    for i in range(101):
+        display2 = SnakeNoDisplay()
+        snake = SnakeGame(display2)
+        scores.append(snake.run(agent=agent,mode='train'))
+        print(f'episode {i}: {agent.weights}')
+        if (i%100 ==0):
+            print(f'mean score of {i} episodes: {statistics.mean(scores)}')
+    print(f'training of 100 episodes done: current weights: {agent.weights}')
+    for i in range(5):
+        display = SnakeTkinterDisplay()
+        snake = SnakeGame(display)
+        control_thread = Thread(target=snake.run,kwargs={'agent':agent,'mode':'test'}, daemon=True)
+        control_thread.start()
+        display.run_mainloop()
 
 
