@@ -30,9 +30,10 @@ class SnakeSimpleExtractor(FeatureExtractor):
         # Therefore, it doesn't include diagonals and back of the snake as it cannot move there
         from snake import Squares
         #features['#_of_walls_1_step_away'] = get_adjacent_count(next_state,Squares.Wall)
-        #features['#_of_snake_1_step_away'] = get_adjacent_count(next_state,Squares.Snake)
+        tunnel_count,count = get_dead_end_count(next_state,Squares.Snake,Squares.Wall)
+        features['dead_end'] = 1 if tunnel_count==2 or count==3 else 0
         features['is_end_game'] = 1 if next_state.check_end_game() else 0
-        util.divide_all(features,10.0)
+        util.divide_all(features,100.0)
         return features
         
     @staticmethod
@@ -40,18 +41,23 @@ class SnakeSimpleExtractor(FeatureExtractor):
         features = dict()
         features['distance_to_food'] = 1
         #features['#_of_walls_1_step_away'] = 1
-        #features['#_of_snake_1_step_away'] = 1
+        features['dead_end'] = 0
         features['is_end_game'] = 0
         return features
 
-def get_adjacent_count(state,square):
+def get_dead_end_count(state,square1,square2):
     '''
-    return number of "square" in adjacent squares.
+    return tunnel_count,count of "squares" that may cause to enter a dead end.
     '''
     positions = state.get_adjacent_positions()
     count = 0
-    for pos in positions:
-        if (state.get_pos(pos).value==square.value):
-            count += 1
-    return count
+    tunnel_count = 0
+    # way is either front or side, helping to detect tunnels/ dead ends
+    for way,positions in positions.items():
+        for pos in positions:
+            if (state.get_pos(pos).value==square1.value or state.get_pos(pos).value == square2.value):
+                count += 1
+                if(way =='side'):
+                    tunnel_count+=1
+    return tunnel_count,count
 

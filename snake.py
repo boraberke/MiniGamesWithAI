@@ -4,7 +4,7 @@ import queue
 from pynput import keyboard
 import time
 from featureExtractors import SnakeSimpleExtractor as features
-from collections import deque 
+from collections import deque,defaultdict
 from agents import Approximate_QLearning_Agent
 import statistics
 
@@ -135,14 +135,14 @@ class GameState:
         returns adjacent positions that snake can move.
         '''
         actions = self.get_legal_actions()
-        positions = []
+        positions = defaultdict(list)
         move_pos = self.get_legal_move_positions()
         for action in actions:
             if action == None:
                 if move_pos.get(self.snake_facing):
-                    positions.append(move_pos.get(self.snake_facing))
+                    positions['front'].append(move_pos.get(self.snake_facing))
             else:
-                positions.append(move_pos.get(action))
+                   positions['side'].append(move_pos.get(action))
         return positions
 
     def get_legal_move_positions(self):
@@ -342,14 +342,15 @@ if __name__ == "__main__":
     from threading import Thread
     agent = Approximate_QLearning_Agent(features,learning_rate=0.5)
     scores = []
-    for i in range(101):
+    episodes = 40
+    for i in range(episodes+1):
         display2 = SnakeNoDisplay()
         snake = SnakeGame(display2)
         scores.append(snake.run(agent=agent,mode='train'))
         print(f'episode {i}: {agent.weights}')
-        if (i%100 ==0):
+        if (i%episodes ==0):
             print(f'mean score of {i} episodes: {statistics.mean(scores)}')
-    print(f'training of 100 episodes done: current weights: {agent.weights}')
+    print(f'training of {episodes} episodes done: current weights: {agent.weights}')
     for i in range(5):
         display = SnakeTkinterDisplay()
         snake = SnakeGame(display)
