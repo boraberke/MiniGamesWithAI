@@ -353,6 +353,8 @@ if __name__ == "__main__":
     for i in range(5):
         display = SnakeTkinterDisplay()
         snake = SnakeGame(display)
+        #set epsilon 0 for optimal result.
+        agent.epsilon = 0
         control_thread = Thread(target=snake.run,kwargs={'agent':agent,'mode':'test'}, daemon=True)
         control_thread.start()
         display.run_mainloop()

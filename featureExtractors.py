@@ -30,7 +30,7 @@ class SnakeSimpleExtractor(FeatureExtractor):
         # Therefore, it doesn't include diagonals and back of the snake as it cannot move there
         from snake import Squares
         #features['#_of_walls_1_step_away'] = get_adjacent_count(next_state,Squares.Wall)
-        features['#_of_snake_1_step_away'] = get_adjacent_count(next_state,Squares.Snake)
+        #features['#_of_snake_1_step_away'] = get_adjacent_count(next_state,Squares.Snake)
         features['is_end_game'] = 1 if next_state.check_end_game() else 0
         util.divide_all(features,10.0)
         return features
@@ -40,7 +40,7 @@ class SnakeSimpleExtractor(FeatureExtractor):
         features = dict()
         features['distance_to_food'] = 1
         #features['#_of_walls_1_step_away'] = 1
-        features['#_of_snake_1_step_away'] = 1
+        #features['#_of_snake_1_step_away'] = 1
         features['is_end_game'] = 0
         return features
 
