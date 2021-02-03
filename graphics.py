@@ -95,6 +95,16 @@ class SnakeBasicDisplay:
     def update(self,state):
         state.print_state()
 
+class SnakeNoDisplay:
+    '''
+    only for training purposes.
+    ''' 
+    def initialize(self,state):
+        return None
+    def update(self,state):
+        return None
+
+
 
 class SnakeTkinterDisplay:
     def initialize(self,state):
@@ -136,15 +146,19 @@ class SnakeTkinterDisplay:
         import copy
         from snake import Squares as s
         # draw the removed tail
-        if ( not game_state.empty_positions_to_update.empty()):
-            empty_pos = game_state.empty_positions_to_update.get()
+        if (game_state.empty_positions_to_update):
+            empty_pos = game_state.empty_positions_to_update.pop()
             self._draw_rect(empty_pos,s.Empty)
-        snake_positions = copy.deepcopy(game_state.snake_positions)
-        head_pos = snake_positions.pop()
+        head_pos = game_state.get_snake_head()
         # draw new head position
         self._draw_rect(head_pos,s.Snake)
         # draw the food position
-        self._draw_rect(game_state.food_position,s.Food)
+        self._draw_rect(game_state.get_food(),s.Food)
+        # if game ended, close the display after 1 second.
+        if(game_state.is_ended()):
+            import time
+            time.sleep(1)
+            self.root.destroy()
 
     def get_canvas_coordinates(self,coordinates):
         x = coordinates[0]

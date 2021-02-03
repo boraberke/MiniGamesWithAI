@@ -7,5 +7,3 @@ game = TicTacToe(table,'Human','AI')
 control_thread = Thread(target=game.run, daemon=True)
 control_thread.start()
 table.run_mainloop()
-
-
