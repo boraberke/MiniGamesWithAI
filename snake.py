@@ -325,8 +325,6 @@ class SnakeGame():
                     print('episode limit reached.')
                     break
             self.display.update(self.state)
-
-        print(self.state.score,end=' ')
         return self.state.score
 
     def update_sleep_time(self):
@@ -342,13 +340,14 @@ if __name__ == "__main__":
     from threading import Thread
     agent = Approximate_QLearning_Agent(features,learning_rate=0.5)
     scores = []
-    episodes = 40
+    episodes = 35
     for i in range(episodes+1):
         display2 = SnakeNoDisplay()
         snake = SnakeGame(display2)
-        scores.append(snake.run(agent=agent,mode='train'))
-        print(f'episode {i}: {agent.weights}')
-        if (i%episodes ==0):
+        score =snake.run(agent=agent,mode='train')
+        scores.append(score)
+        print(f'episode {i}, score:{score} {agent.weights}')
+        if (i%episodes ==0 and i!=0):
             print(f'mean score of {i} episodes: {statistics.mean(scores)}')
     print(f'training of {episodes} episodes done: current weights: {agent.weights}')
     for i in range(5):
