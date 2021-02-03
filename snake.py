@@ -1,4 +1,4 @@
-from enum import Enum 
+from enum import Enum
 import random
 import queue
 from pynput import keyboard
@@ -14,6 +14,7 @@ class Squares(Enum):
     Snake = '@'
     Empty = ' '
     Food = '*'
+    SnakeHead = 'A'
     
 
 class GameState:
@@ -57,9 +58,13 @@ class GameState:
 
     def add_random_food(self):
         empty_squares = self.get_empty_positions()
-        pos = random.choice(empty_squares)
-        self.update_state(pos,Squares.Food)
-        self.food = pos
+        # if there are no empty squares left, than the game is over. All positions are filled.
+        if empty_squares:
+            pos = random.choice(empty_squares)
+            self.update_state(pos,Squares.Food)
+            self.food = pos
+        else:
+            self.is_end = True
     def _initialize_snake_pos(self,snake_length):
         snake_positions = queue.deque()
         center_x,center_y = self._get_center_pos()
@@ -265,13 +270,13 @@ class GameState:
 
 class SnakeGame():
     def __init__(self,display):
-        self.state = GameState(13,13,3,'NORTH')
+        self.state = GameState(7,7,3,'EAST')
         self.player = 'Human'
         self.actionQueue = queue.Queue()
         self.listener = None
         self.display = display
         self.display.initialize(self.state)
-        self.sleep_time = 0.25
+        self.sleep_time = 0.35
         self.last_change_at = 0
         self.move_count = 0
 
@@ -301,15 +306,15 @@ class SnakeGame():
         mode = kwargs['mode']
         if mode=='play' or mode=='debug':
             self.check_keystrokes()
-        while (not self.state.is_ended()):
+        while not self.state.is_ended():
             if mode=='train' or mode=='test':
                 self.actionQueue.put(agent.get_action(self.state))
-            if (not self.actionQueue.empty()):
+            if not self.actionQueue.empty():
                 action = self.actionQueue.get()
                 self.state.apply_action(action)
                 if mode=='train' or mode=='debug':
                     agent.update(self.state,action)
-                #print(features.get_features(self.state,action))
+                # print(features.get_features(self.state,action))
             else:
                 if mode=='train' or mode=='debug':
                     agent.update(self.state,None)
@@ -325,7 +330,6 @@ class SnakeGame():
                     print('episode limit reached.')
                     break
             self.display.update(self.state)
-
         print(self.state.score,end=' ')
         return self.state.score
 
@@ -342,7 +346,7 @@ if __name__ == "__main__":
     from threading import Thread
     agent = Approximate_QLearning_Agent(features,learning_rate=0.5)
     scores = []
-    episodes = 40
+    episodes = 3
     for i in range(episodes+1):
         display2 = SnakeNoDisplay()
         snake = SnakeGame(display2)
