@@ -38,7 +38,7 @@ class SnakeSimpleExtractor(FeatureExtractor):
         # features['#_of_walls_1_step_away'] = get_adjacent_count(next_state,Squares.Wall)
         tunnel_count, count = get_dead_end_count(next_state, Squares.Snake, Squares.Wall)
         # features['dead_end'] = 1 if tunnel_count == 2 or count == 3 else 0
-        depth = 6
+        depth = 12
         features['new_dead_end'] = 1 if is_dead_end(state, action, depth) else 0
         features['is_end_game'] = 1 if next_state.check_end_game() else 0
         util.divide_all(features, 100.0)
@@ -83,19 +83,13 @@ def is_dead_end(state, action, depth):
     expanded_states = []
     s_a_pairs = Queue()
     s_a_pairs.put((state, [action]))
-    expanded_states.append(state)
     for _ in range(depth):
         state, actions = s_a_pairs.get()
-        while state in expanded_states:
-            if not s_a_pairs.empty():
-                state, actions = s_a_pairs.get()
-            else:
-                break
+        # if the state is expanded, find another state that is not expanded.
         for i in range(len(actions)):
             # update state by taking the state
             action = actions[i]
             next_state = state.next_state(action)
-            expanded_states.append(next_state)
             # if the state is end state and there are no alternative actions to take, then it is a dead end.
             if next_state.check_end_game():
                 if s_a_pairs.empty() and i == len(actions) - 1:

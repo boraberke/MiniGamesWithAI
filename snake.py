@@ -270,13 +270,13 @@ class GameState:
 
 class SnakeGame():
     def __init__(self,display):
-        self.state = GameState(7,7,3,'EAST')
+        self.state = GameState(9,9,3,'EAST')
         self.player = 'Human'
         self.actionQueue = queue.Queue()
         self.listener = None
         self.display = display
         self.display.initialize(self.state)
-        self.sleep_time = 0.35
+        self.sleep_time = 0.1
         self.last_change_at = 0
         self.move_count = 0
 
