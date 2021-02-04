@@ -115,7 +115,7 @@ class SnakeNoDisplay:
 
 class SnakeTkinterDisplay:
     def initialize(self, state):
-        MAX_SIZE = 500
+        MAX_SIZE = 800
         # get number of squares in the state
         self.square_counts = (state.width, state.height)
         self.width_height_rate = self.square_counts[0] / self.square_counts[1]
@@ -131,7 +131,10 @@ class SnakeTkinterDisplay:
         self.rectangle_width = self.width // self.square_counts[0]
         self.rectangle_height = self.height // self.square_counts[1]
         self.offset = max(self.rectangle_width / 8, self.rectangle_height / 8)
-        self.old_head_pos = None
+        self.eye_size = max(self.rectangle_width / 5, self.rectangle_height / 5)
+        self.pupil_size = max(self.rectangle_width / 10, self.rectangle_height / 10)
+        self.old_head_pos = state.get_snake_head()
+        self.snake_facing = state.snake_facing
         # screen and canvas
         self.root = tk.Tk()
         self.canvas = tk.Canvas(self.root, width=self.width, height=self.height)
@@ -143,6 +146,7 @@ class SnakeTkinterDisplay:
         for y in range(len(state)):
             for x in range(len(state[y])):
                 self._draw_rect((x, y), state[y][x])
+        self.update(game_state)
         self.canvas.configure(bg='black')
         self.canvas.pack()
 
@@ -152,6 +156,8 @@ class SnakeTkinterDisplay:
     def update(self, game_state):
         import copy
         from snake import Squares as s
+        # update facing direction of the snake
+        self.snake_facing = game_state.snake_facing
         # draw the removed tail
         if game_state.empty_positions_to_update:
             empty_pos = game_state.empty_positions_to_update.pop()
@@ -195,4 +201,46 @@ class SnakeTkinterDisplay:
             self.canvas.create_rectangle(x1, y1, x2, y2, fill='black')
         else:
             self.canvas.create_rectangle(x1 + offset, y1 + offset, x2 - offset, y2 - offset, fill='green')
+            self._draw_eyes(x1+offset,y1+offset,x2-offset,y2-offset,offset)
+     
+    def _draw_eyes(self,x1,y1,x2,y2,offset):
+        '''
+        draw two eyes on snake head according to facing direction. 
+        x1,y1
+            ______
+            | 1  2 |
+            |      |
+            |_3__4_|
+                    x2,y2
+        Above demonstration of the snake head. There are 4 different places to put the eyes:
+        facing north: 1,2
+        facing east: 2,4
+        facing south: 3,4
+        facing west: 1,3
+        '''
+        self._draw_eye_parts(x1,y1,x2,y2,offset,self.eye_size,'white')
+        self._draw_eye_parts(x1+offset/2,y1+offset/2,x2-offset/2,y2-offset/2,offset,self.pupil_size,'black')
+
+    
+    def _draw_eye_parts(self,x1,y1,x2,y2,offset,oval_size,color):
+        eye_locations = dict()
+        eye_locations[1] = [x1+offset,y1+offset,x1+offset+oval_size,y1+offset+oval_size]
+        eye_locations[2] = [x2-offset-oval_size,y1+offset,x2-offset,y1+offset+oval_size]
+        eye_locations[3] = [x1+offset,y2-offset-oval_size,x1+offset+oval_size,y2-offset]
+        eye_locations[4] = [x2-offset-oval_size,y2-offset-oval_size,x2-offset,y2-offset]
+        if self.snake_facing == 'NORTH':
+            self.canvas.create_oval(eye_locations[1],fill = color)
+            self.canvas.create_oval(eye_locations[2],fill = color)
+        elif self.snake_facing == 'EAST':
+            self.canvas.create_oval(eye_locations[2],fill = color)
+            self.canvas.create_oval(eye_locations[4],fill = color)
+        elif self.snake_facing == 'SOUTH':
+            self.canvas.create_oval(eye_locations[3],fill = color)
+            self.canvas.create_oval(eye_locations[4],fill = color)
+        elif self.snake_facing == 'WEST':
+            self.canvas.create_oval(eye_locations[1],fill = color)
+            self.canvas.create_oval(eye_locations[3],fill = color)
+        
+
+
 

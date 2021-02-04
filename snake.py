@@ -14,7 +14,7 @@ class Squares(Enum):
     Snake = '@'
     Empty = ' '
     Food = '*'
-    SnakeHead = 'A'
+    SnakeHead = 'HH' # only used for graphics! not implemented inside gamestate.
     
 
 class GameState:
@@ -276,7 +276,7 @@ class SnakeGame():
         self.listener = None
         self.display = display
         self.display.initialize(self.state)
-        self.sleep_time = 0.1
+        self.sleep_time = 0.2
         self.last_change_at = 0
         self.move_count = 0
 
@@ -346,7 +346,7 @@ if __name__ == "__main__":
     from threading import Thread
     agent = Approximate_QLearning_Agent(features,learning_rate=0.5)
     scores = []
-    episodes = 3
+    episodes = 1
     for i in range(episodes+1):
         display2 = SnakeNoDisplay()
         snake = SnakeGame(display2)
