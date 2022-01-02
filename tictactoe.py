@@ -193,4 +193,11 @@ class TicTacToe:
         return (self.winner != '')
 
         
-    
+def start_tictactoe(player1,player2):
+    from graphics import TicTacToeTable
+    from threading import Thread
+    table = TicTacToeTable()
+    game = TicTacToe(table,player1,player2)
+    control_thread = Thread(target=game.run, daemon=True)
+    control_thread.start()
+    table.run_mainloop()   

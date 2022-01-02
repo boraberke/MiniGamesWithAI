@@ -341,7 +341,7 @@ class SnakeGame():
 
 
 
-if __name__ == "__main__":
+def start_snake():
     from graphics import SnakeTkinterDisplay,SnakeNoDisplay
     from threading import Thread
     agent = Approximate_QLearning_Agent(features,learning_rate=0.5)
