@@ -15,8 +15,8 @@ try:
                                 "type =",
                                 "help = "])
 except:
-    print("python main.py <game> <type>")
-    print("e.g. python main.py tictactoe human_vs_ai")
+    print("python main.py -g <game> -t <type>")
+    print("e.g. python main.py -g tictactoe -t human_vs_ai")
 
 
 for opt, arg in opts:
